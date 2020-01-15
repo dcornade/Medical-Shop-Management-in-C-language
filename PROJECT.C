@@ -20,9 +20,11 @@ struct meds{
 	int rate;
 	int stock;
 };
+int sucount();
 int searchunm();
+void udate();
 int searchudoc();
-void medshow(int a,int b);
+void medshow(int a);
 int ucount();
 int selmed(int a,int *p);
 int medcount();
@@ -1209,11 +1211,10 @@ void uadd(){
 		printf("Want to Enter another record?[y/n]: -");
 		ch=getch();
 	}while(ch=='y'||ch=='Y');
-	
-	getch();
+	umenu();
 }
 void usearc(){
-	
+
 	int i,l=0,k=0,p=0,a=1;
 	char s,ch,che,ser[40],chei;
 	struct user obj;
@@ -1337,9 +1338,11 @@ void usearc(){
 	medmenu();
 }
 void umod(){
-	int id,f=1;
+	int id,f=1,a=1;
 	struct user obj;
-	FILE *fp;
+	struct user obj1;
+	char ch;
+	FILE *fp, *fp1;
 	clrscr();
 	createbox();
 	gotoxy(30,1);
@@ -1349,12 +1352,16 @@ void umod(){
 	gotoxy(5,5);
 	printf("Enter Customer ID to Modify: -");
 	scanf("%d",&id);
+	fp1=fopen("temp.txt","a+");
+	fp=fopen("user.txt","a+");
 	while( fscanf(fp,"%d %s %s %s %d %d %d %d %d\n",&obj.id,obj.pname,obj.dname,obj.address,&obj.age,&obj.med1,&obj.med2,&obj.med3,&obj.total) != EOF){
 		if(obj.id==id){
 			a=0;
+			gotoxy(7,2);
+			printf("Record Found!");
 			gotoxy(5,7);
 			printf("Name : - %s",obj.pname);
-			gotoxy(45,7)
+			gotoxy(45,7);
 			printf("Doctor's Name: - %s",obj.dname);
 			gotoxy(5,9);
 			printf("Area : - %s",obj.address);
@@ -1367,27 +1374,93 @@ void umod(){
 			gotoxy(5,13);
 			medshow(obj.med3);
 			gotoxy(45,13);
-			printf("Total: -",)
+			printf("Total: - %d",obj.total);
+			gotoxy(10,15);
+			printf("Do you Want to Modify this Data[y/n]?: -");
+			ch=getch();
+			if(ch=='y'||ch=='Y'){
+				udate();
+			}else{
+				fprintf(fp1,"%d %s %s %s %d %d %d %d %d\n",obj.id,obj.pname,obj.dname,obj.address,obj.age,obj.med1,obj.med2,obj.med3,obj.total);
+			}
+		}else{
+			fprintf(fp1,"%d %s %s %s %d %d %d %d %d\n",obj.id,obj.pname,obj.dname,obj.address,obj.age,obj.med1,obj.med2,obj.med3,obj.total);
 		}
 	}
+	fclose(fp);
+	fclose(fp1);
+	remove("user.txt");
+	rename("temp.txt","user.txt");
 	if(a==1){
 		gotoxy(10,15);
 		printf("No Records Found!!");
-	}else{
-		gotoxy(10,15);
-		printf("Do you Want to Modify this Data[y/n]?: -")
-		ch=getch();
 	}
-	if(ch=='y'||ch=='Y'){
-
-	}
+	gotoxy(2,22);
+	printf("Want to Search another time?[y/n]: -");
+	
 }
 void udel(){
+	int id,f=1,a=1;
+	struct user obj;
+	struct user obj1;
+	char ch;
+	FILE *fp, *fp1;
+	do{
 	clrscr();
 	createbox();
 	gotoxy(30,1);
 	printf("-Customer Data Management-");
-	getch();
+	gotoxy(28,3);
+	printf("Delete Data of Customers");
+	gotoxy(5,5);
+	printf("Enter Customer ID to Delete: -");
+	scanf("%d",&id);
+	fp1=fopen("temp.txt","a+");
+	fp=fopen("user.txt","a+");
+	while( fscanf(fp,"%d %s %s %s %d %d %d %d %d\n",&obj.id,obj.pname,obj.dname,obj.address,&obj.age,&obj.med1,&obj.med2,&obj.med3,&obj.total) != EOF){
+		if(obj.id==id){
+gotoxy(7,2);
+			printf("Record Found!");
+			gotoxy(5,7);
+			printf("Name : - %s",obj.pname);
+			gotoxy(45,7);
+			printf("Doctor's Name: - %s",obj.dname);
+			gotoxy(5,9);
+			printf("Area : - %s",obj.address);
+			gotoxy(45,9);
+			printf("Age : - %d",obj.age);
+			gotoxy(5,11);
+			medshow(obj.med1);
+			gotoxy(45,11);
+			medshow(obj.med2);
+			gotoxy(5,13);
+			medshow(obj.med3);
+			gotoxy(45,13);
+			printf("Total: - %d",obj.total);
+			gotoxy(10,15);
+			printf("Do you Want to Delete this Data[y/n]?: -");
+			ch=getch();
+			if(ch=='y'||ch=='Y'){
+			}else{
+				fprintf(fp1,"%d %s %s %s %d %d %d %d %d\n",obj.id,obj.pname,obj.dname,obj.address,obj.age,obj.med1,obj.med2,obj.med3,obj.total);
+			}
+		}else{
+			fprintf(fp1,"%d %s %s %s %d %d %d %d %d\n",obj.id,obj.pname,obj.dname,obj.address,obj.age,obj.med1,obj.med2,obj.med3,obj.total);
+		}
+	}
+
+			
+	fclose(fp);
+	fclose(fp1);
+	remove("user.txt");
+	rename("temp.txt","user.txt");
+	gotoxy(4,20);
+	printf("Record Deleted Succesfully");
+	gotoxy(4,21);
+	printf("Want to print another record?[y/n]-");
+	ch=getch();
+	}while(ch=='y'||ch=='Y');
+	umenu();
 }
 int ucount(){
 	int i,a,s;
@@ -1782,4 +1855,133 @@ int searchudoc(){
 			break;
 	}
 	return a;
+}
+void udate(){
+int a,i,total,qun,p=1;
+	FILE *fp;
+	char ch,che,chec;
+	struct user obj;
+		fp=fopen("temp.txt","a+");
+		clrscr();
+		qun=sucount();
+		obj.id=qun+1;
+		createbox();
+		gotoxy(30,1);
+		printf("-Customer Data Management-");
+		gotoxy(31,3);
+		printf("User Update Data");
+		gotoxy(5,5);
+		printf("Serial Number: - %d",obj.id);
+		gotoxy(5,6);
+		printf("Patient's Name:-");
+		gotoxy(50,6);
+		printf("Under Doctor: -");
+		gotoxy(5,7);
+		printf("Area:-");
+		gotoxy(50,7);
+		printf("Age: -");
+		gotoxy(2,9);
+		printf("------------------------------------------------------------------------------");
+		gotoxy(2,11);
+		printf("------------------------------------------------------------------------------");
+		gotoxy(10,10);
+		printf("Medicines");
+		gotoxy(65,10);
+		printf("|  Price  |");
+		gotoxy(65,12);
+		printf("|");
+		gotoxy(75,12);
+		printf("|");
+		gotoxy(65,13);
+		printf("|");
+		gotoxy(75,13);
+		printf("|");
+		gotoxy(65,14);
+		printf("|");
+		gotoxy(75,14);
+		printf("|");
+		gotoxy(65,15);
+		printf("|");
+		gotoxy(75,15);
+		printf("|");
+		gotoxy(65,16);
+		printf("|");
+		gotoxy(75,16);
+		printf("|");
+		gotoxy(65,17);
+		printf("|");
+		gotoxy(75,17);
+		printf("|");
+		gotoxy(65,18);
+		printf("|");
+		gotoxy(75,18);
+		printf("|");
+		gotoxy(65,19);
+		printf("|");
+		gotoxy(75,19);
+		printf("|");
+		/*gotoxy(65,20);
+		printf("|");
+		gotoxy(75,20);
+		printf("|");
+		gotoxy(65,21);
+		printf("|");
+		gotoxy(75,21);
+		printf("|");*/
+		gotoxy(22,6);
+		fflush(stdin);
+		gets(obj.pname);
+		gotoxy(66,6);
+		fflush(stdin);
+		gets(obj.dname);
+		gotoxy(12,7);
+		fflush(stdin);
+		gets(obj.address);
+		gotoxy(58,7);
+		fflush(stdin);
+		scanf("%d",&obj.age);
+		for(i=1;i<4;i++){
+			gotoxy(3,11+i);
+			printf("%d.-",i);
+			switch(i){
+				case 1:
+						obj.med1=selmed(i,&total);
+						obj.total=total;
+						gotoxy(5,11+i);
+						break;
+				case 2:
+						obj.med2=selmed(i,&total);
+						obj.total=obj.total+total;
+						break;
+				case 3:
+						obj.med3=selmed(i,&total);
+						obj.total=obj.total+total;
+			}
+		}
+		gotoxy(57,19);
+		printf("Total: -");
+		gotoxy(68,19);
+		printf("%d",obj.total);
+			fprintf(fp,"%d %s %s %s %d %d %d %d %d\n",obj.id,obj.pname,obj.dname,obj.address,obj.age,obj.med1,obj.med2,obj.med3,obj.total);
+			gotoxy(10,22);
+			printf("Record Updated successfully!!!");
+		fclose(fp);
+		gotoxy(45,23);
+		printf("Want to modify another record?[y/n");
+		
+		
+}
+int sucount(){
+	int i,a,s;
+	char ch,chel;
+	struct user obj;
+	FILE *fp;
+	fp=fopen("temp.txt","r");
+	obj.id=0;
+	while( fscanf(fp,"%d %s %s %s %d %d %d %d %d\n",&obj.id,obj.pname,obj.dname,obj.address,&obj.age,&obj.med1,&obj.med2,&obj.med3,&obj.total) != EOF){
+
+	}
+	fclose(fp);
+	return obj.id;
+
 }
